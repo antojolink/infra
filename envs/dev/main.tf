@@ -58,3 +58,33 @@ module "database" {
 output "db_endpoint" {
   value = module.database.endpoint
 }
+
+module "frontend" {
+  source               = "../../modules/frontend"
+  env                  = "dev"
+  extra_upload_origins = ["http://localhost:5173"]
+}
+
+output "admin_bucket" {
+  value = module.frontend.admin_bucket
+}
+
+output "menu_bucket" {
+  value = module.frontend.menu_bucket
+}
+
+output "images_bucket" {
+  value = module.frontend.images_bucket
+}
+
+output "admin_url" {
+  value = module.frontend.admin_url
+}
+
+output "menu_url" {
+  value = module.frontend.menu_url
+}
+
+output "images_base_url" {
+  value = module.frontend.images_base_url
+}
