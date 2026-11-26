@@ -1,0 +1,26 @@
+name: ci
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "~1.10"
+
+      - name: Check formatting
+        run: terraform fmt -check -recursive
+
+      - name: Validate bootstrap, dev, and prod
+        run: |
+          for dir in bootstrap envs/dev envs/prod; do
+            echo "=== Validating $dir ==="
+            terraform -chdir="$dir" init -backend=false
+            terraform -chdir="$dir" validate
+          done
