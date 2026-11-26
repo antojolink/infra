@@ -57,20 +57,20 @@ resource "aws_cloudwatch_dashboard" "this" {
       {
         type = "metric", x = 0, y = 0, width = 8, height = 6
         properties = {
-          title  = "EC2 - CPU (%)"
-          region = local.region
-          stat   = "Average"
-          period = 60
+          title   = "EC2 - CPU (%)"
+          region  = local.region
+          stat    = "Average"
+          period  = 60
           metrics = [["AWS/EC2", "CPUUtilization", "InstanceId", var.instance_id]]
         }
       },
       {
         type = "metric", x = 8, y = 0, width = 8, height = 6
         properties = {
-          title  = "EC2 - Memoria (%)"
-          region = local.region
-          stat   = "Average"
-          period = 60
+          title   = "EC2 - Memoria (%)"
+          region  = local.region
+          stat    = "Average"
+          period  = 60
           metrics = [["CWAgent", "mem_used_percent", "InstanceId", var.instance_id]]
         }
       },
@@ -90,20 +90,20 @@ resource "aws_cloudwatch_dashboard" "this" {
       {
         type = "metric", x = 0, y = 6, width = 8, height = 6
         properties = {
-          title  = "RDS - CPU (%)"
-          region = local.region
-          stat   = "Average"
-          period = 60
+          title   = "RDS - CPU (%)"
+          region  = local.region
+          stat    = "Average"
+          period  = 60
           metrics = [["AWS/RDS", "CPUUtilization", "DBInstanceIdentifier", var.db_identifier]]
         }
       },
       {
         type = "metric", x = 8, y = 6, width = 8, height = 6
         properties = {
-          title  = "RDS - Conexiones"
-          region = local.region
-          stat   = "Average"
-          period = 60
+          title   = "RDS - Conexiones"
+          region  = local.region
+          stat    = "Average"
+          period  = 60
           metrics = [["AWS/RDS", "DatabaseConnections", "DBInstanceIdentifier", var.db_identifier]]
         }
       },

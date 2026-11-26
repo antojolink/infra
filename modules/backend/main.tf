@@ -140,3 +140,7 @@ output "api_url" {
 output "log_group" {
   value = aws_cloudwatch_log_group.api.name
 }
+
+output "public_dns" {
+  value = aws_eip.api.public_dns
+}
