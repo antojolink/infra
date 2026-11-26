@@ -37,3 +37,24 @@ output "cognito_user_pool_id" {
 output "cognito_client_id" {
   value = module.auth.client_id
 }
+
+module "network" {
+  source   = "../../modules/network"
+  env      = "dev"
+  vpc_cidr = "10.10.0.0/16"
+}
+
+output "vpc_id" {
+  value = module.network.vpc_id
+}
+
+module "database" {
+  source             = "../../modules/database"
+  env                = "dev"
+  private_subnet_ids = module.network.private_subnet_ids
+  db_sg_id           = module.network.db_sg_id
+}
+
+output "db_endpoint" {
+  value = module.database.endpoint
+}
