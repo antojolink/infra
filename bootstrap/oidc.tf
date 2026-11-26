@@ -20,7 +20,10 @@ resource "aws_iam_role" "github_actions" {
           "token.actions.githubusercontent.com:sub" = [
             "repo:antojolink/sass-core:*",
             "repo:antojolink/admin-web:*",
-            "repo:antojolink/menu-web:*"
+            "repo:antojolink/menu-web:*",
+            "repo:antojolink@337914302/sass-core@*:*",
+            "repo:antojolink@337914302/admin-web@*:*",
+            "repo:antojolink@337914302/menu-web@*:*"
           ]
         }
       }
