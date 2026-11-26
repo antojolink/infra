@@ -115,3 +115,14 @@ output "ec2_instance_id" {
 output "api_url" {
   value = module.backend.api_url
 }
+module "monitoring" {
+  source        = "../../modules/monitoring"
+  env           = "dev"
+  instance_id   = module.backend.instance_id
+  db_identifier = module.database.identifier
+  log_group     = module.backend.log_group
+}
+
+output "dashboard_url" {
+  value = module.monitoring.dashboard_url
+}

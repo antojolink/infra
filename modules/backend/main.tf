@@ -114,7 +114,7 @@ resource "aws_instance" "api" {
   tags = { Name = "antojolink-${var.env}-api" }
 
   lifecycle {
-    ignore_changes = [ami]
+    ignore_changes = [ami, user_data]
   }
 
   depends_on = [aws_cloudwatch_log_group.api]
@@ -136,4 +136,7 @@ output "public_ip" {
 
 output "api_url" {
   value = "http://${aws_eip.api.public_ip}"
+}
+output "log_group" {
+  value = aws_cloudwatch_log_group.api.name
 }
