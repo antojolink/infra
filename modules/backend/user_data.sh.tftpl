@@ -1,0 +1,76 @@
+#!/bin/bash
+set -euxo pipefail
+
+dnf install -y docker
+systemctl enable --now docker
+usermod -aG docker ec2-user
+
+mkdir -p /usr/local/lib/docker/cli-plugins
+curl -fsSL https://github.com/docker/compose/releases/latest/download/docker-compose-linux-x86_64 \
+  -o /usr/local/lib/docker/cli-plugins/docker-compose
+chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
+
+mkdir -p /opt/antojolink
+cd /opt/antojolink
+
+cat > .env <<'EOF'
+NODE_ENV=${node_env}
+APP_ENV=${env}
+PORT=3000
+DATABASE_URL=${database_url}
+COGNITO_USER_POOL_ID=${cognito_user_pool_id}
+COGNITO_CLIENT_ID=${cognito_client_id}
+AWS_REGION=us-east-2
+IMAGES_BUCKET=${images_bucket}
+IMAGES_BASE_URL=${images_base_url}
+CORS_ORIGINS=${cors_origins}
+AWS_XRAY_DAEMON_ADDRESS=xray:2000
+DEV_AUTH_BYPASS=false
+EOF
+chmod 600 .env
+
+cat > nginx.conf <<'EOF'
+server {
+  listen 80;
+  client_max_body_size 10m;
+  location / {
+    proxy_pass http://api:3000;
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+  }
+}
+EOF
+
+cat > docker-compose.yml <<'EOF'
+services:
+  api:
+    image: ${api_image}
+    env_file: .env
+    restart: unless-stopped
+    depends_on:
+      - xray
+    logging:
+      driver: awslogs
+      options:
+        awslogs-region: us-east-2
+        awslogs-group: ${log_group}
+        awslogs-stream: api
+  nginx:
+    image: nginx:1.27-alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - api
+    restart: unless-stopped
+  xray:
+    image: amazon/aws-xray-daemon:latest
+    command: ["-n", "us-east-2", "-b", "0.0.0.0:2000"]
+    restart: unless-stopped
+EOF
+
+docker compose pull || true
+docker compose up -d || true
