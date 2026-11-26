@@ -10,6 +10,24 @@ curl -fsSL https://github.com/docker/compose/releases/latest/download/docker-com
   -o /usr/local/lib/docker/cli-plugins/docker-compose
 chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
 
+# ---------- CloudWatch Agent (memoria y disco) ----------
+dnf install -y amazon-cloudwatch-agent
+cat > /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json <<'EOF'
+{
+  "agent": { "metrics_collection_interval": 60 },
+  "metrics": {
+    "namespace": "CWAgent",
+    "append_dimensions": { "InstanceId": "$${aws:InstanceId}" },
+    "metrics_collected": {
+      "mem": { "measurement": ["mem_used_percent"] },
+      "disk": { "measurement": ["used_percent"], "resources": ["/"] }
+    }
+  }
+}
+EOF
+/opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -a fetch-config -m ec2 -s \
+  -c file:/opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json
+
 mkdir -p /opt/antojolink
 cd /opt/antojolink
 
@@ -26,6 +44,7 @@ IMAGES_BASE_URL=${images_base_url}
 CORS_ORIGINS=${cors_origins}
 AWS_XRAY_DAEMON_ADDRESS=xray:2000
 DEV_AUTH_BYPASS=false
+API_IMAGE=${api_image}
 EOF
 chmod 600 .env
 
@@ -46,7 +65,7 @@ EOF
 cat > docker-compose.yml <<'EOF'
 services:
   api:
-    image: ${api_image}
+    image: $${API_IMAGE}
     env_file: .env
     restart: unless-stopped
     depends_on:

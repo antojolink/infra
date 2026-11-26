@@ -66,3 +66,6 @@ output "database_url" {
   value     = "postgres://antojolink:${random_password.db.result}@${aws_db_instance.this.address}:5432/antojolink"
   sensitive = true
 }
+output "identifier" {
+  value = aws_db_instance.this.identifier
+}
