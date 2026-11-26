@@ -88,3 +88,30 @@ output "menu_url" {
 output "images_base_url" {
   value = module.frontend.images_base_url
 }
+
+module "backend" {
+  source               = "../../modules/backend"
+  env                  = "dev"
+  node_env             = "development"
+  subnet_id            = module.network.public_subnet_ids[0]
+  api_sg_id            = module.network.api_sg_id
+  database_url         = module.database.database_url
+  cognito_user_pool_id = module.auth.user_pool_id
+  cognito_client_id    = module.auth.client_id
+  images_bucket        = module.frontend.images_bucket
+  images_base_url      = module.frontend.images_base_url
+  cors_origins = [
+    module.frontend.admin_url,
+    module.frontend.menu_url,
+    "http://localhost:5173",
+    "http://localhost:4321",
+  ]
+}
+
+output "ec2_instance_id" {
+  value = module.backend.instance_id
+}
+
+output "api_url" {
+  value = module.backend.api_url
+}
